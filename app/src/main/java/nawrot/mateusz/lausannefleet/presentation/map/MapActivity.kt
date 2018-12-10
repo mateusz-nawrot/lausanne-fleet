@@ -2,6 +2,8 @@ package nawrot.mateusz.lausannefleet.presentation.map
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -10,15 +12,24 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import dagger.android.AndroidInjection
 import nawrot.mateusz.lausannefleet.R
+import javax.inject.Inject
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private lateinit var viewModel: MapViewModel
 
     private var map: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
+        initViewModel()
         initMap()
     }
 
@@ -43,5 +54,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun isMapServiceAvailable(): Boolean {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS
+    }
+
+    private fun initViewModel() {
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(MapViewModel::class.java)
     }
 }

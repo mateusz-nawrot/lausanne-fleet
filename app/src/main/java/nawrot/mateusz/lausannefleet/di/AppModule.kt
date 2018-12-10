@@ -5,8 +5,10 @@ import android.content.Context
 import dagger.Binds
 import dagger.Module
 import nawrot.mateusz.lausannefleet.data.AndroidSchedulersProvider
-import nawrot.mateusz.lausannefleet.data.FleetStationRepository
-import nawrot.mateusz.lausannefleet.domain.base.SchedulersProvider
+import nawrot.mateusz.lausannefleet.data.car.FleetCarRepository
+import nawrot.mateusz.lausannefleet.data.station.FleetStationRepository
+import nawrot.mateusz.lausannefleet.domain.SchedulersProvider
+import nawrot.mateusz.lausannefleet.domain.car.CarRepository
 import nawrot.mateusz.lausannefleet.domain.station.StationRepository
 import nawrot.mateusz.lausannefleet.presentation.FleetApp
 
@@ -25,6 +27,9 @@ abstract class AppModule {
 
     @Binds
     abstract fun bindStationRepository(stationRepository: FleetStationRepository): StationRepository
+
+    @Binds
+    abstract fun bindCarRepository(carRepository: FleetCarRepository): CarRepository
 
     @Module
     companion object {

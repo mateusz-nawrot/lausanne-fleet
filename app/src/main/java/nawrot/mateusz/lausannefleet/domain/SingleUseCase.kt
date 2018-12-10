@@ -1,7 +1,6 @@
 package nawrot.mateusz.lausannefleet.domain
 
 import io.reactivex.Single
-import nawrot.mateusz.lausannefleet.domain.base.SchedulersProvider
 
 
 abstract class SingleUseCase<in P, R>(private val schedulersProvider: SchedulersProvider) {
