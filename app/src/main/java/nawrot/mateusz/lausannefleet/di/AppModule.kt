@@ -2,13 +2,13 @@ package nawrot.mateusz.lausannefleet.di
 
 import android.app.Application
 import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import nawrot.mateusz.lausannefleet.R
 import nawrot.mateusz.lausannefleet.data.AndroidSchedulersProvider
 import nawrot.mateusz.lausannefleet.data.ApiInterface
+import nawrot.mateusz.lausannefleet.data.ApiKeyInterceptor
 import nawrot.mateusz.lausannefleet.data.car.FleetCarRepository
 import nawrot.mateusz.lausannefleet.data.station.FleetStationRepository
 import nawrot.mateusz.lausannefleet.domain.base.SchedulersProvider
@@ -21,6 +21,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 
@@ -48,7 +49,7 @@ abstract class AppModule {
         @JvmStatic
         @Provides
         @Singleton
-        fun okHttpClient(context: Context): OkHttpClient {
+        fun okHttpClient(context: Context, apiKeyInterceptor: ApiKeyInterceptor): OkHttpClient {
             val cacheSize = 10 * 1024 * 1024
             val builder = OkHttpClient.Builder()
             builder.retryOnConnectionFailure(true)
@@ -57,26 +58,20 @@ abstract class AppModule {
             val logInterceptor = HttpLoggingInterceptor()
             logInterceptor.level = HttpLoggingInterceptor.Level.BODY
             builder.addInterceptor(logInterceptor)
+            builder.addInterceptor(apiKeyInterceptor)
             return builder.build()
         }
 
         @JvmStatic
         @Provides
         @Singleton
-        fun gson(): Gson {
-            return GsonBuilder().create()
-        }
-
-        @JvmStatic
-        @Provides
-        @Singleton
-        fun retrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
+        fun retrofit(okHttpClient: OkHttpClient, @Named("base_url") baseUrl: String): Retrofit {
             return Retrofit.Builder()
-                .baseUrl("")
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(okHttpClient)
-                .build()
+                    .baseUrl(baseUrl)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .client(okHttpClient)
+                    .build()
         }
 
         @JvmStatic
@@ -84,6 +79,20 @@ abstract class AppModule {
         @Singleton
         fun apiInterface(retrofit: Retrofit): ApiInterface {
             return retrofit.create(ApiInterface::class.java)
+        }
+
+        @JvmStatic
+        @Provides
+        @Named("api_key")
+        fun apiKey(context: Context): String {
+            return context.getString(R.string.google_maps_key)
+        }
+
+        @JvmStatic
+        @Provides
+        @Named("base_url")
+        fun baseUrl(context: Context): String {
+            return context.getString(R.string.base_url)
         }
 
     }
