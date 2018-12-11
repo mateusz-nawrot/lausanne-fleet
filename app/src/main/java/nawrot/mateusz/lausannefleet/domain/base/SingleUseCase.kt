@@ -1,4 +1,4 @@
-package nawrot.mateusz.lausannefleet.domain
+package nawrot.mateusz.lausannefleet.domain.base
 
 import io.reactivex.Single
 

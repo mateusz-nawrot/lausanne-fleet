@@ -8,6 +8,8 @@ interface StationRepository {
 
     fun getStations(): Single<List<Station>>
 
-    fun getRandomStationPosition(excludedStationId: String): Single<Position>
+    fun getTripOrigin(stationId: String): Single<Position>
+
+    fun getTripDestination(startStationId: String): Single<Position>
 
 }

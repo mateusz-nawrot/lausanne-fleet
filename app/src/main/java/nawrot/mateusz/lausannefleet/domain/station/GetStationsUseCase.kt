@@ -1,8 +1,8 @@
 package nawrot.mateusz.lausannefleet.domain.station
 
 import io.reactivex.Single
-import nawrot.mateusz.lausannefleet.domain.SingleUseCase
-import nawrot.mateusz.lausannefleet.domain.SchedulersProvider
+import nawrot.mateusz.lausannefleet.domain.base.SingleUseCase
+import nawrot.mateusz.lausannefleet.domain.base.SchedulersProvider
 import javax.inject.Inject
 
 
