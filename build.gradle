@@ -28,6 +28,9 @@ ext {
 
     rxJavaVersion = '2.2.4'
     rxAndroidVersion = '2.1.0'
+
+    retrofitVersion = '2.5.0'
+    okHttpVersion = '3.12.0'
 }
 
 allprojects {
