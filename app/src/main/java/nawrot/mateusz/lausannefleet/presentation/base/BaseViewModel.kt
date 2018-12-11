@@ -7,30 +7,30 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
 
-abstract class BaseViewModel<T> : ViewModel() {
+open class BaseViewModel : ViewModel() {
 
-    abstract val defaultState: T
-
-    private val viewState: MutableLiveData<T> by lazy { MutableLiveData<T>() }
+//    abstract val defaultState: T
+//
+//    private val viewState: MutableLiveData<T> by lazy { MutableLiveData<T>() }
 
     private val compositeDisposable by lazy {
         CompositeDisposable()
     }
 
     override fun onCleared() {
-        compositeDisposable.clear()
         super.onCleared()
+        compositeDisposable.clear()
     }
 
-    fun viewState(): LiveData<T> = viewState
-
-    protected fun updateViewState(newViewState: T) {
-        viewState.value = newViewState
-    }
-
-    protected fun currentViewState(): T {
-        return viewState.value ?: defaultState
-    }
+//    fun viewState(): LiveData<T> = viewState
+//
+//    protected fun updateViewState(newViewState: T) {
+//        viewState.value = newViewState
+//    }
+//
+//    protected fun currentViewState(): T {
+//        return viewState.value ?: defaultState
+//    }
 
     protected fun manage(disposable: Disposable) {
         compositeDisposable.addAll(disposable)

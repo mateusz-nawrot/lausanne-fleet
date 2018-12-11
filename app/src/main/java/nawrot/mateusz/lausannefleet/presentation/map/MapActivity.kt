@@ -1,10 +1,9 @@
 package nawrot.mateusz.lausannefleet.presentation.map
 
-import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.common.ConnectionResult
@@ -20,8 +19,10 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.PolyUtil
 import dagger.android.AndroidInjection
 import nawrot.mateusz.lausannefleet.R
+import nawrot.mateusz.lausannefleet.domain.car.ActionType
+import nawrot.mateusz.lausannefleet.domain.car.CarAction
+import nawrot.mateusz.lausannefleet.presentation.base.toLatLng
 import javax.inject.Inject
-import kotlin.math.ln
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -30,11 +31,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var viewModel: MapViewModel
 
-    private var map: GoogleMap? = null
+    private lateinit var map: GoogleMap
 
     private val points = mutableListOf<LatLng>()
 
-    var movingMarker: Marker? = null
+    private val markers = ArrayList<Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -47,29 +48,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        // Add a marker in Sydney and move the camera
         val station = LatLng(46.517202, 6.629205)
         val station2 = LatLng(46.541050, 6.658185)
 
-//        map?.addMarker(MarkerOptions().position(station).title("Station 1"))
-        map?.addMarker(MarkerOptions().position(station2).title("Station 2"))
+        map.addMarker(MarkerOptions().position(station2).title("Station 2"))
 
-        map?.moveCamera(CameraUpdateFactory.newLatLng(station))
-        map?.animateCamera(CameraUpdateFactory.zoomTo(13f))
+        map.moveCamera(CameraUpdateFactory.newLatLng(station))
+        map.animateCamera(CameraUpdateFactory.zoomTo(13f))
 
-        movingMarker = map?.addMarker(MarkerOptions().position(station).title("Station 1"))
+        onStationClicked("1")
+//
+//        val line = "al|zGaxmg@VyDBCBGBSGQCAEo@@m@TgIRmFJwEBmBNiGNoDh@yCBUCg@E[MSsAmBa@g@}@i@iGuDOGk@pAa@rAkBnFMxAm@rA_@z@_AzAi@Yc@{@Ma@KyAOeAQk@_@[YI_@@O@WQQSS]@YHe@Va@t@w@NO@o@Ee@O[SQUE}FUU@_@Hw@b@c@V[HWAmCs@qA[qB[wDk@eASaA[cAc@i@]Y[g@o@yJyPMQo@[cAc@WG_@Co@@g@Fi@N_@@_CE?GGIGCGBEH[Ge@We@_@a@i@Uq@M}AKaACGMG_AEYS_EmAo@Uc@Yi@e@g@k@{AoBsAuA{DcDqC}B}AuA_CuBg@i@_AsAc@cAe@_Bm@qDo@sFiAaJa@iDdAYTIJM"
 
-        val line = "al|zGaxmg@VyDBCBGBSGQCAEo@@m@TgIRmFJwEBmBNiGNoDh@yCBUCg@E[MSsAmBa@g@}@i@iGuDOGk@pAa@rAkBnFMxAm@rA_@z@_AzAi@Yc@{@Ma@KyAOeAQk@_@[YI_@@O@WQQSS]@YHe@Va@t@w@NO@o@Ee@O[SQUE}FUU@_@Hw@b@c@V[HWAmCs@qA[qB[wDk@eASaA[cAc@i@]Y[g@o@yJyPMQo@[cAc@WG_@Co@@g@Fi@N_@@_CE?GGIGCGBEH[Ge@We@_@a@i@Uq@M}AKaACGMG_AEYS_EmAo@Uc@Yi@e@g@k@{AoBsAuA{DcDqC}B}AuA_CuBg@i@_AsAc@cAe@_Bm@qDo@sFiAaJa@iDdAYTIJM"
-
-        addPolyline(line, Color.RED)
-
-        for (point in points) {
-            val delay: Long = ((points.indexOf(point)+1) * 100).toLong()
-            Handler().postDelayed({
-                movingMarker?.position = point
-                Log.d("MOVING_MARKER", "moving marker to $point")
-            }, delay)
-        }
     }
 
     private fun initMap() {
@@ -93,6 +83,27 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun addPolyline(polyline: String, color: Int) {
         val decoded = PolyUtil.decode(polyline)
         points.addAll(decoded)
-        map?.addPolyline(PolylineOptions().addAll(decoded).width(5f).color(color))
+        map.addPolyline(PolylineOptions().addAll(decoded).width(5f).color(color))
+    }
+
+    private fun onStationClicked(stationId: String) {
+        viewModel.addCar(stationId).observe(this, Observer { car -> car?.apply { handleCarAction(this) } })
+    }
+
+    private fun handleCarAction(carAction: CarAction) {
+        Log.d("CAR_ACTION", carAction.toString())
+        when(carAction.actionType) {
+            ActionType.ADD -> {
+                val newMarker = map.addMarker(MarkerOptions().position(carAction.car.position.toLatLng()))
+                newMarker.tag = carAction.car.id.toString()
+                markers.add(newMarker)
+            }
+            ActionType.MOVE -> {
+                markers.find { it.tag == carAction.car.id.toString()}?.position = carAction.car.position.toLatLng()
+            }
+            ActionType.REMOVE -> {
+                markers.find { it.tag == carAction.car.id.toString()}?.remove()
+            }
+        }
     }
 }

@@ -13,8 +13,10 @@ import nawrot.mateusz.lausannefleet.data.car.FleetCarRepository
 import nawrot.mateusz.lausannefleet.data.station.FleetStationRepository
 import nawrot.mateusz.lausannefleet.domain.base.SchedulersProvider
 import nawrot.mateusz.lausannefleet.domain.car.CarRepository
+import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.station.StationRepository
 import nawrot.mateusz.lausannefleet.presentation.FleetApp
+import nawrot.mateusz.lausannefleet.presentation.GoogleMapHelper
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -42,6 +44,9 @@ abstract class AppModule {
 
     @Binds
     abstract fun bindCarRepository(carRepository: FleetCarRepository): CarRepository
+
+    @Binds
+    abstract fun bindMapHelper(mapHelper: GoogleMapHelper): MapHelper
 
     @Module
     companion object {

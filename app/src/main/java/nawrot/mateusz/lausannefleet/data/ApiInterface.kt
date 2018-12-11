@@ -1,16 +1,16 @@
 package nawrot.mateusz.lausannefleet.data
 
-import com.google.android.gms.maps.model.LatLng
 import io.reactivex.Single
 import nawrot.mateusz.lausannefleet.domain.directions.DirectionsResponse
+import nawrot.mateusz.lausannefleet.domain.map.Position
 import retrofit2.http.GET
-import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 interface ApiInterface {
 
-    @GET("/maps/api/directions/json?origin={origin}&destination={destination}")
-    fun getDirections(@Path("origin") origin: LatLng,
-                      @Path("destination") destination: LatLng): Single<DirectionsResponse>
+    @GET("/maps/api/directions/json")
+    fun getDirections(@Query("origin") origin: Position,
+                      @Query("destination") destination: Position): Single<DirectionsResponse>
 
 }
