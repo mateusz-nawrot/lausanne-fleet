@@ -4,4 +4,6 @@
 
     <string name="google_maps_key">AIzaSyD6W7spb_wZlLcFO--SkHoQnDg1ll_YaFw</string>
     <string name="base_url">https://maps.googleapis.com/</string>
+
+    <string name="send_car">Send a car</string>
 </resources>
