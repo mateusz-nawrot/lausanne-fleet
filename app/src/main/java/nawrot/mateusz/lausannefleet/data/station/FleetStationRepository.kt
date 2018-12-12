@@ -22,19 +22,18 @@ class FleetStationRepository @Inject constructor() : StationRepository {
     }
 
     override fun getTripOrigin(stationId: String): Single<Position> {
+        //get random station from stations list excluding clicked station
+        val randomStationPosition = stations.filterNot { it.id == stationId }.shuffled().first().position
+        return Single.just(randomStationPosition)
+    }
+
+    override fun getTripDestination(stationId: String): Single<Position> {
         val startStation = stations.find { it.id == stationId }
         return if (startStation != null) {
             Single.just(startStation.position)
         } else {
             Single.error(IllegalStateException("Origin station can't be null"))
         }
-    }
-
-    //TODO error handling?
-    override fun getTripDestination(startStationId: String): Single<Position> {
-        //get random station from stations list excluding starting point
-        val randomStationPosition = stations.filterNot { it.id == startStationId }.shuffled().first().position
-        return Single.just(randomStationPosition)
     }
 
 }

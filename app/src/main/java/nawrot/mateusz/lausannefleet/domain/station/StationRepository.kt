@@ -10,6 +10,6 @@ interface StationRepository {
 
     fun getTripOrigin(stationId: String): Single<Position>
 
-    fun getTripDestination(startStationId: String): Single<Position>
+    fun getTripDestination(stationId: String): Single<Position>
 
 }

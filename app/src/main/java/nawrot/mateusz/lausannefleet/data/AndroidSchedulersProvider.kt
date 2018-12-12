@@ -1,6 +1,5 @@
 package nawrot.mateusz.lausannefleet.data
 
-import io.reactivex.CompletableTransformer
 import io.reactivex.ObservableTransformer
 import io.reactivex.SingleTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers

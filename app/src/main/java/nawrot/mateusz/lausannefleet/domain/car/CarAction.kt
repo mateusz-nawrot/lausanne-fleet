@@ -1,7 +1,7 @@
 package nawrot.mateusz.lausannefleet.domain.car
 
 
-data class CarAction(val id: Int, val actionType: ActionType = ActionType.ADD, val car: Car) {
+data class CarAction(val id: String, val type: ActionType = ActionType.ADD, val car: Car) {
 
     companion object {
         fun add(car: Car): CarAction = CarAction(car.id, ActionType.ADD, car)
