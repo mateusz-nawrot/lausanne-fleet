@@ -10,8 +10,6 @@ import android.graphics.Canvas
 import android.graphics.drawable.VectorDrawable
 
 
-
-
 fun Position.toLatLng(): LatLng {
     return LatLng(lat, lng)
 }
@@ -29,4 +27,8 @@ fun Context.getBitmapDescriptor(id: Int): BitmapDescriptor {
     vectorDrawable.draw(canvas)
 
     return BitmapDescriptorFactory.fromBitmap(bm)
+}
+
+fun <T> MutableCollection<T>.removeMatching(predicate: (T) -> Boolean) {
+    removeAll(filter(predicate))
 }

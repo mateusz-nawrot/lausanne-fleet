@@ -22,6 +22,9 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
     private val carCountLiveData = MutableLiveData<Int>()
     private val timeSpentLiveData = MutableLiveData<Int>()
 
+    private val fleet = arrayListOf<LiveData<CarAction>>()
+
+    //TODO - use when initialized
     fun checkMapsAvailability() {
         //check map availability - emit error VS if no play services installed
         if (mapHelper.isGooglePlayServicesAvailable().not()) {
@@ -30,12 +33,17 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
     }
 
     fun addCar(stationId: String): LiveData<CarAction> {
-        val carData = MutableLiveData<CarAction>()
-        manage(addCarUseCase.execute(stationId).subscribe(
-                { carData.value = it },
+        val carLiveData = MutableLiveData<CarAction>()
+        fleet.add(carLiveData)
+        manage(addCarUseCase.execute(stationId).doOnComplete { fleet.remove(carLiveData) }.subscribe(
+                { carLiveData.value = it },
                 { error -> errorLiveData.value = ErrorEvent(error.localizedMessage) }
         ))
-        return carData
+        return carLiveData
+    }
+
+    fun fleet(): List<LiveData<CarAction>> {
+        return fleet
     }
 
     fun getStations() {

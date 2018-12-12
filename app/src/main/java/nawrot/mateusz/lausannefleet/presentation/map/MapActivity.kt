@@ -2,6 +2,7 @@ package nawrot.mateusz.lausannefleet.presentation.map
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,13 +21,28 @@ import nawrot.mateusz.lausannefleet.domain.car.ActionType
 import nawrot.mateusz.lausannefleet.domain.car.Car
 import nawrot.mateusz.lausannefleet.domain.car.CarAction
 import nawrot.mateusz.lausannefleet.domain.station.Station
+import nawrot.mateusz.lausannefleet.presentation.CarMarkerParcel
+import nawrot.mateusz.lausannefleet.presentation.PolylineParcel
+import nawrot.mateusz.lausannefleet.presentation.StationMarkerParcel
 import nawrot.mateusz.lausannefleet.presentation.base.getBitmapDescriptor
+import nawrot.mateusz.lausannefleet.presentation.base.removeMatching
 import nawrot.mateusz.lausannefleet.presentation.base.toLatLng
 import javax.inject.Inject
 
-const val POLYLINE_WIDTH = 6f
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
+
+    companion object {
+        const val POLYLINE_WIDTH = 6f
+
+        const val KEY_CAR_MARKERS = "carmarkers"
+        const val KEY_STATION_MARKERS = "stationmarkers"
+        const val KEY_POLYLINES = "polylines"
+
+        const val DEFAULT_MAP_ZOOM = 12.3f
+
+        val LAUSANNE_LAT_LNG = LatLng(46.521474, 6.612146)
+    }
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -43,15 +59,41 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private val blueMarkerIcon by lazy { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE) }
     private val redMarkerIcon by lazy { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED) }
 
+
+    private val polylineParcels = arrayListOf<PolylineParcel>()
+    private val carParcels = arrayListOf<CarMarkerParcel>()
+    private val stationParcels = arrayListOf<StationMarkerParcel>()
+
     private var menuRef: Menu? = null
+
+    private var fromInstanceState = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        initViewModel()
+
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(MapViewModel::class.java)
         initMap()
+
+        if (savedInstanceState != null) {
+            fromInstanceState = true
+            polylineParcels.addAll(savedInstanceState.getParcelableArrayList(KEY_POLYLINES))
+            carParcels.addAll(savedInstanceState.getParcelableArrayList(KEY_CAR_MARKERS))
+            stationParcels.addAll(savedInstanceState.getParcelableArrayList(KEY_STATION_MARKERS))
+        } else {
+            initViewModel()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.apply {
+            outState.putParcelableArrayList(KEY_CAR_MARKERS, carParcels)
+            outState.putParcelableArrayList(KEY_POLYLINES, polylineParcels)
+            outState.putParcelableArrayList(KEY_STATION_MARKERS, stationParcels)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -64,16 +106,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         map = googleMap
         map.setOnMarkerClickListener(this)
         map.setOnMapClickListener(this)
-        map.moveCamera(CameraUpdateFactory.newLatLng(LatLng(46.522873, 6.635265)))
-        map.animateCamera(CameraUpdateFactory.zoomTo(12f))
+        showLausanne(map)
 
-        viewModel.getStations()
+        if (fromInstanceState) {
+            recreateMarkers()
+            initViewModel()
+            viewModel.fleet().forEach { it.observe(this, Observer { car -> handleCarAction(car) }) }
+        } else {
+            viewModel.getStations()
+        }
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
         marker?.apply {
             val markerTag = (tag as String)
             if (markerTag.contains("station")) {
+                //TODO  improve id handling
                 val id = markerTag.split(":")[1]
                 deselectAllMarkers()
                 marker.setIcon(redMarkerIcon)
@@ -82,7 +130,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                     isVisible = true
                     setOnMenuItemClickListener {
                         sendCarToStation(id)
-                    true
+                        true
                     }
                 }
             }
@@ -95,7 +143,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         deselectAllMarkers()
     }
 
-    private fun deselectAllMarkers(markerToExclude: String? = null) {
+    private fun deselectAllMarkers() {
         stationMarkers.forEach { it.setIcon(blueMarkerIcon) }
     }
 
@@ -105,7 +153,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(MapViewModel::class.java)
         viewModel.error().observe(this, Observer { error -> showError(error) })
         viewModel.stations().observe(this, Observer { stations -> drawStations(stations) })
     }
@@ -114,26 +161,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         viewModel.addCar(stationId).observe(this, Observer { car -> car?.apply { handleCarAction(this) } })
     }
 
-    private fun drawStations(stations: List<Station>) {
-        for (station in stations) {
-            val stationMarker = map.addMarker(MarkerOptions().position(station.position.toLatLng()).icon(blueMarkerIcon))
-            stationMarker.tag = "station:${station.id}"
-            stationMarkers.add(stationMarker)
-        }
-    }
-
     private fun handleCarAction(action: CarAction) {
+        //TODO remove log
+        Log.d("CAR_ACTION", action.toString())
         when (action.type) {
             ActionType.ADD -> {
-                addMarker(action.car)
-                addPolyline(action.car)
+                drawCarMarker(action.car)
+                drawPolyline(action.car)
             }
             ActionType.MOVE -> {
+                carParcels.find { it.id == action.id }?.marker
                 findCarMarker(action.id)?.position = action.car.position.toLatLng()
             }
             ActionType.REMOVE -> {
                 findCarMarker(action.id)?.remove()
                 findPolyline(action.id)?.remove()
+
+                //rotation purpose
+                carParcels.removeMatching { it.id == action.id }
+                polylineParcels.removeMatching { it.id == action.id }
             }
         }
     }
@@ -146,17 +192,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         Toast.makeText(this, errorEvent.errorMessage, Toast.LENGTH_LONG).show()
     }
 
-    private fun addMarker(car: Car) {
-        val newMarker = map.addMarker(MarkerOptions().position(car.position.toLatLng()).icon(carIcon).anchor(0.5f, 0.5f))
-        newMarker.tag = car.id
-        carMarkers.add(newMarker)
+    private fun drawStations(stations: List<Station>) {
+        for (station in stations) {
+            //TODO  improve id handling
+            val id = "station:${station.id}"
+            val stationMarkerOptions = MarkerOptions().position(station.position.toLatLng()).icon(blueMarkerIcon)
+
+            addStationMarker(id, stationMarkerOptions)
+        }
     }
 
-    private fun addPolyline(car: Car) {
+    private fun drawCarMarker(car: Car) {
+        val markerOptions = MarkerOptions().position(car.position.toLatLng()).icon(carIcon).anchor(0.5f, 0.5f).zIndex(1f)
+        addCarMarker(car.id, markerOptions)
+    }
+
+    private fun drawPolyline(car: Car) {
         val route = car.route.map { it.toLatLng() }
-        val polyline = map.addPolyline(PolylineOptions().addAll(route).width(POLYLINE_WIDTH).color(getColor()))
-        polyline.tag = car.id
-        routes.add(polyline)
+        addPolyline(car.id, route)
     }
 
     //TODO add random color
@@ -170,6 +223,53 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
     private fun findPolyline(id: String): Polyline? {
         return routes.find { it.tag == id }
+    }
+
+    private fun recreateMarkers() {
+        for (stationParcel in stationParcels) {
+            addStationMarker(stationParcel.id, stationParcel.position)
+        }
+
+        for (carParcel in carParcels) {
+            addCarMarker(carParcel.id, carParcel.marker, true)
+        }
+
+        for (polylineParcel in polylineParcels) {
+            addPolyline(polylineParcel.id, polylineParcel.list, true)
+        }
+    }
+
+    private fun addStationMarker(id: String, markerOptions: MarkerOptions) {
+        val stationMarker = map.addMarker(markerOptions)
+        stationMarker.tag = id
+        stationMarkers.add(stationMarker)
+    }
+
+    private fun addCarMarker(id: String, markerOptions: MarkerOptions, recreatingFromState: Boolean = false) {
+        val newMarker = map.addMarker(markerOptions)
+        newMarker.tag = id
+        carMarkers.add(newMarker)
+
+        //rotation purpose, flag to prevent from adding again when recreating from savedInstanceState
+        if (recreatingFromState.not()) {
+            carParcels.add(CarMarkerParcel(id, markerOptions))
+        }
+    }
+
+    private fun addPolyline(id: String, route: List<LatLng>, recreatingFromState: Boolean = false) {
+        val polyline = map.addPolyline(PolylineOptions().addAll(route).width(POLYLINE_WIDTH).color(getColor()))
+        polyline.tag = id
+        routes.add(polyline)
+
+        //rotation purpose, flag to prevent from adding again when recreating from savedInstanceState
+        if (recreatingFromState.not()) {
+            polylineParcels.add(PolylineParcel(id, route))
+        }
+    }
+
+    private fun showLausanne(map: GoogleMap) {
+        map.moveCamera(CameraUpdateFactory.newLatLng(LAUSANNE_LAT_LNG))
+        map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_MAP_ZOOM))
     }
 
 }
