@@ -23,10 +23,4 @@ class AndroidSchedulersProvider @Inject constructor() : SchedulersProvider {
         }
     }
 
-    override fun completableTransformer(): CompletableTransformer {
-        return CompletableTransformer { it ->
-            it.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-        }
-    }
-
 }
