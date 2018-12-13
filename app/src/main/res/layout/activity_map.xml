@@ -21,8 +21,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/fleet_value_margin"
         android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/currentCarsLabel"
         app:layout_constraintStart_toEndOf="@id/currentCarsLabel"
-        app:layout_constraintTop_toTopOf="@id/currentCarsLabel"
         tools:text="1" />
 
     <TextView
@@ -40,8 +40,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/fleet_value_margin"
         android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/totalCarsLabel"
         app:layout_constraintStart_toEndOf="@id/totalCarsLabel"
-        app:layout_constraintTop_toBottomOf="@id/currentCarsLabel"
         tools:text="19" />
 
     <TextView
@@ -59,8 +59,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/fleet_value_margin"
         android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/totalTimeLabel"
         app:layout_constraintStart_toEndOf="@id/totalTimeLabel"
-        app:layout_constraintTop_toBottomOf="@id/totalCarsLabel"
         tools:text="123" />
 
     <fragment
