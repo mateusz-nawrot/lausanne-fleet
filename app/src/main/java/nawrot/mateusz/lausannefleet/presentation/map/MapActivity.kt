@@ -55,34 +55,34 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private val routes = ArrayList<Polyline>()
 
     private val carIcon by lazy { getBitmapDescriptor(R.drawable.ic_car) }
-    private val blueMarkerIcon by lazy { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE) }
+    private val blueMarkerIcon by lazy { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) }
     private val redMarkerIcon by lazy { BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED) }
 
-
+    //restoring the state after rotation
     private val polylineParcels = arrayListOf<PolylineParcel>()
     private val carParcels = arrayListOf<CarMarkerParcel>()
     private val stationParcels = arrayListOf<StationMarkerParcel>()
 
     private var menuRef: Menu? = null
 
-    private var fromInstanceState = false
+    //flag used for marker recreation when map is ready after device rotation
+    private var isAfterRotation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(MapViewModel::class.java)
         initMap()
 
         if (savedInstanceState != null) {
-            fromInstanceState = true
+            isAfterRotation = true
             polylineParcels.addAll(savedInstanceState.getParcelableArrayList(KEY_POLYLINES))
             carParcels.addAll(savedInstanceState.getParcelableArrayList(KEY_CAR_MARKERS))
             stationParcels.addAll(savedInstanceState.getParcelableArrayList(KEY_STATION_MARKERS))
         } else {
-            initViewModel()
+            observeViewModel()
         }
     }
 
@@ -107,10 +107,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         map.setOnMapClickListener(this)
         showLausanne(map)
 
-        if (fromInstanceState) {
+        if (isAfterRotation) {
             recreateMarkers()
-            initViewModel()
-            //used only to resubscribe to existing cars after device rotation
+            observeViewModel()
+            //used only for resubscribing to existing cars after device rotation
             viewModel.fleet().forEach { it.observe(this, Observer { car -> handleCarAction(car) }) }
         } else {
             viewModel.getStations()
@@ -132,9 +132,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                         true
                     }
                 }
+                return false
             }
         }
-        return false
+        return true
     }
 
     override fun onMapClick(point: LatLng?) {
@@ -147,12 +148,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private fun initMap() {
+        //no need to safe cast, R.id.mapFragment will always be SupportMapFragment
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
-    private fun initViewModel() {
-        viewModel.error().observe(this, Observer { error -> showError(error) })
+    private fun observeViewModel() {
+        viewModel.viewState().observe(this, Observer { error -> handleErrorEvent(error) })
         viewModel.stations().observe(this, Observer { stations -> drawStations(stations) })
 
         viewModel.currentCarCount().observe(this, Observer { currentCars -> updateCurrentCarCounter(currentCars) })
@@ -197,12 +199,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         totalTimeValue.text = time.toString()
     }
 
-    private fun showError(errorEvent: ErrorEvent) {
-        if (errorEvent.mapError) {
+    private fun handleErrorEvent(error: ErrorEvent) {
+        if (error.mapError) {
             //TODO - show some dialog/textview?
         }
-        //TODO - better error handling...
-        Toast.makeText(this, errorEvent.errorMessage, Toast.LENGTH_LONG).show()
+        Toast.makeText(this@MapActivity, error.errorMessage, Toast.LENGTH_LONG).show()
     }
 
     private fun findCarMarker(id: String): Marker? {
@@ -252,7 +253,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         polyline.tag = id
         routes.add(polyline)
 
-        //rotation purpose, flag to prevent from adding again when recreating from savedInstanceState
+        //rotation purpose, flag to prevent from adding parcels to list again when recreating from savedInstanceState
         if (recreatingFromState.not()) {
             polylineParcels.add(PolylineParcel(id, route))
         }
@@ -279,7 +280,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
     //TODO add random color
     private fun getColor(): Int {
-        return Color.MAGENTA
+        return Color.BLACK
     }
 
 }

@@ -21,7 +21,7 @@ class FleetCarRepository @Inject constructor(private val apiInterface: ApiInterf
 
     companion object {
         const val CAR_UPDATE_INTERVAL_MILLIS = 1000L
-        const val MAXIMUM_CAPACITY = 3
+        const val MAXIMUM_CAPACITY = 10
 
         const val TOTAL_TIME_UPDATE_INTERVAL_MILLIS = 5000L
     }
