@@ -5,7 +5,7 @@ import io.reactivex.Single
 import nawrot.mateusz.lausannefleet.data.ApiInterface
 import nawrot.mateusz.lausannefleet.domain.car.ActionType
 import nawrot.mateusz.lausannefleet.domain.car.Car
-import nawrot.mateusz.lausannefleet.domain.car.CarAction
+import nawrot.mateusz.lausannefleet.domain.car.CarEvent
 import nawrot.mateusz.lausannefleet.domain.car.CarRepository
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.map.Position
@@ -25,7 +25,7 @@ class FleetCarRepository @Inject constructor(private val apiInterface: ApiInterf
     private var totalCarsCreated = 0
     private var totalTimeSpent = 0
 
-    override fun addCar(origin: Position, destination: Position): Observable<CarAction> {
+    override fun addCar(origin: Position, destination: Position): Observable<CarEvent> {
         if (!canAdd()) {
             return Observable.error(IllegalStateException("You have reached maximum number of cars"))
         }
@@ -47,21 +47,21 @@ class FleetCarRepository @Inject constructor(private val apiInterface: ApiInterf
             Observable
                     .interval(CAR_UPDATE_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
                     .map { moveCar(cars.first { it.id == newCar.id }) }
-                    .startWith(CarAction.add(newCar))
+                    .startWith(CarEvent.add(newCar))
                     .takeUntil { it.type == ActionType.REMOVE }
                     .doOnComplete { cars.remove(newCar) }
         }
     }
 
-    private fun moveCar(car: Car): CarAction {
+    private fun moveCar(car: Car): CarEvent {
         car.step += 1
         car.position = car.route[car.step]
         totalTimeSpent += 1
         //if it reached last point of the route - it should be removed from map
         return if (car.position == car.route.last()) {
-            CarAction.remove(car)
+            CarEvent.remove(car)
         } else {
-            CarAction.move(car)
+            CarEvent.move(car)
         }
     }
 

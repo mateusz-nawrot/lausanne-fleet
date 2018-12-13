@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import nawrot.mateusz.lausannefleet.domain.base.ErrorEvent
 import nawrot.mateusz.lausannefleet.domain.car.AddCarUseCase
-import nawrot.mateusz.lausannefleet.domain.car.CarAction
+import nawrot.mateusz.lausannefleet.domain.car.CarEvent
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.station.GetStationsUseCase
 import nawrot.mateusz.lausannefleet.domain.station.Station
@@ -22,7 +22,7 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
     private val carCountLiveData = MutableLiveData<Int>()
     private val timeSpentLiveData = MutableLiveData<Int>()
 
-    private val fleet = arrayListOf<LiveData<CarAction>>()
+    private val fleet = arrayListOf<LiveData<CarEvent>>()
 
     //TODO - use when initialized
     fun checkMapsAvailability() {
@@ -32,8 +32,8 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
         }
     }
 
-    fun addCar(stationId: String): LiveData<CarAction> {
-        val carLiveData = MutableLiveData<CarAction>()
+    fun addCar(stationId: String): LiveData<CarEvent> {
+        val carLiveData = MutableLiveData<CarEvent>()
         fleet.add(carLiveData)
         manage(addCarUseCase.execute(stationId).doOnComplete { fleet.remove(carLiveData) }.subscribe(
                 { carLiveData.value = it },
@@ -42,7 +42,7 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
         return carLiveData
     }
 
-    fun fleet(): List<LiveData<CarAction>> {
+    fun fleet(): List<LiveData<CarEvent>> {
         return fleet
     }
 

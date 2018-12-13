@@ -11,9 +11,9 @@ import javax.inject.Inject
 
 class AddCarUseCase @Inject constructor(schedulersProvider: SchedulersProvider,
                                         private val stationRepository: StationRepository,
-                                        private val carRepository: CarRepository) : ObservableUseCase<String, CarAction>(schedulersProvider) {
+                                        private val carRepository: CarRepository) : ObservableUseCase<String, CarEvent>(schedulersProvider) {
 
-    override fun createUseCaseObservable(stationId: String): Observable<CarAction> {
+    override fun createUseCaseObservable(stationId: String): Observable<CarEvent> {
         return stationRepository.getTripOrigin(stationId)
                 .zipWith(stationRepository.getTripDestination(stationId),
                         BiFunction<Position, Position, Pair<Position, Position>> { origin, destination -> Pair(origin, destination) }

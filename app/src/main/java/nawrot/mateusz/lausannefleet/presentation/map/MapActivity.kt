@@ -19,7 +19,7 @@ import nawrot.mateusz.lausannefleet.R
 import nawrot.mateusz.lausannefleet.domain.base.ErrorEvent
 import nawrot.mateusz.lausannefleet.domain.car.ActionType
 import nawrot.mateusz.lausannefleet.domain.car.Car
-import nawrot.mateusz.lausannefleet.domain.car.CarAction
+import nawrot.mateusz.lausannefleet.domain.car.CarEvent
 import nawrot.mateusz.lausannefleet.domain.station.Station
 import nawrot.mateusz.lausannefleet.presentation.CarMarkerParcel
 import nawrot.mateusz.lausannefleet.presentation.PolylineParcel
@@ -161,25 +161,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         viewModel.addCar(stationId).observe(this, Observer { car -> car?.apply { handleCarAction(this) } })
     }
 
-    private fun handleCarAction(action: CarAction) {
+    private fun handleCarAction(event: CarEvent) {
         //TODO remove log
-        Log.d("CAR_ACTION", action.toString())
-        when (action.type) {
+        Log.d("CAR_ACTION", event.toString())
+        when (event.type) {
             ActionType.ADD -> {
-                drawCarMarker(action.car)
-                drawPolyline(action.car)
+                drawCarMarker(event.car)
+                drawPolyline(event.car)
             }
             ActionType.MOVE -> {
-                carParcels.find { it.id == action.id }?.marker
-                findCarMarker(action.id)?.position = action.car.position.toLatLng()
+                carParcels.find { it.id == event.id }?.marker
+                findCarMarker(event.id)?.position = event.car.position.toLatLng()
             }
             ActionType.REMOVE -> {
-                findCarMarker(action.id)?.remove()
-                findPolyline(action.id)?.remove()
+                findCarMarker(event.id)?.remove()
+                findPolyline(event.id)?.remove()
 
                 //rotation purpose
-                carParcels.removeMatching { it.id == action.id }
-                polylineParcels.removeMatching { it.id == action.id }
+                carParcels.removeMatching { it.id == event.id }
+                polylineParcels.removeMatching { it.id == event.id }
             }
         }
     }
