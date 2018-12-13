@@ -2,6 +2,7 @@ package nawrot.mateusz.lausannefleet.presentation
 
 import android.app.Activity
 import android.app.Application
+import com.squareup.leakcanary.LeakCanary
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -26,6 +27,10 @@ class FleetApp : Application(), HasActivityInjector {
             .build()
 
         appComponent.inject(this)
+
+        if (LeakCanary.isInAnalyzerProcess(this).not()) {
+            LeakCanary.install(this)
+        }
     }
 
     override fun activityInjector(): AndroidInjector<Activity> {

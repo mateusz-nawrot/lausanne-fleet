@@ -30,6 +30,11 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1-alpha01'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1-alpha01'
 
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
+    // Optional, if you use support library fragments:
+    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
+
     //google maps
     implementation "com.google.android.gms:play-services-maps:$googleMapsVersion"
     implementation "com.google.maps.android:android-maps-utils:$googleMapsUtilsVersion"
