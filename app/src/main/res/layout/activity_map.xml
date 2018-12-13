@@ -1,13 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/currentCarsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fleet_label_margin"
+        android:layout_marginTop="@dimen/fleet_label_margin"
+        android:text="@string/current_number_of_cars"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/currentCarsValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fleet_value_margin"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/currentCarsLabel"
+        app:layout_constraintTop_toTopOf="@id/currentCarsLabel"
+        tools:text="1" />
+
+    <TextView
+        android:id="@+id/totalCarsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fleet_label_margin"
+        android:text="@string/total_number_of_cars"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/currentCarsLabel" />
+
+    <TextView
+        android:id="@+id/totalCarsValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fleet_value_margin"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/totalCarsLabel"
+        app:layout_constraintTop_toBottomOf="@id/currentCarsLabel"
+        tools:text="19" />
+
+    <TextView
+        android:id="@+id/totalTimeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fleet_label_margin"
+        android:text="@string/total_time_spent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/totalCarsLabel" />
+
+    <TextView
+        android:id="@+id/totalTimeValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fleet_value_margin"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/totalTimeLabel"
+        app:layout_constraintTop_toBottomOf="@id/totalCarsLabel"
+        tools:text="123" />
 
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/fleet_label_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/totalTimeLabel" />
 
     <ProgressBar
         android:id="@+id/mapProgress"
@@ -15,6 +80,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/mapFragment" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

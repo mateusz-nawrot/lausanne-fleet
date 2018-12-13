@@ -8,4 +8,10 @@ interface CarRepository {
 
     fun addCar(origin: Position, destination: Position): Observable<CarEvent>
 
+    fun getCurrentNumberOfCars(): Observable<Int>
+
+    fun getTotalNumberOfCars(): Observable<Int>
+
+    fun getTotalTimeSpent(): Observable<Int>
+
 }

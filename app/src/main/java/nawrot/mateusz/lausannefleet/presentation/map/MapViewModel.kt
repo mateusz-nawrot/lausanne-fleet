@@ -3,8 +3,7 @@ package nawrot.mateusz.lausannefleet.presentation.map
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import nawrot.mateusz.lausannefleet.domain.base.ErrorEvent
-import nawrot.mateusz.lausannefleet.domain.car.AddCarUseCase
-import nawrot.mateusz.lausannefleet.domain.car.CarEvent
+import nawrot.mateusz.lausannefleet.domain.car.*
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.station.GetStationsUseCase
 import nawrot.mateusz.lausannefleet.domain.station.Station
@@ -15,11 +14,15 @@ import javax.inject.Inject
 
 class MapViewModel @Inject constructor(private val getStationsUseCase: GetStationsUseCase,
                                        private val addCarUseCase: AddCarUseCase,
+                                       private val getTotalNumberOfCarsUseCase: GetTotalNumberOfCarsUseCase,
+                                       private val getCurrentNumberOfCarsUseCase: GetCurrentNumberOfCarsUseCase,
+                                       private val getTotalTimeSpentUseCase: GetTotalTimeSpentUseCase,
                                        private val mapHelper: MapHelper) : BaseViewModel() {
 
     private val errorLiveData = SingleEventLiveData<ErrorEvent>()
     private val stationsLiveData = MutableLiveData<List<Station>>()
-    private val carCountLiveData = MutableLiveData<Int>()
+    private val currentCarCountLiveData = MutableLiveData<Int>()
+    private val totalCarCountLiveData = MutableLiveData<Int>()
     private val timeSpentLiveData = MutableLiveData<Int>()
 
     private val fleet = arrayListOf<LiveData<CarEvent>>()
@@ -42,15 +45,43 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
         return carLiveData
     }
 
-    fun fleet(): List<LiveData<CarEvent>> {
-        return fleet
-    }
-
     fun getStations() {
         manage(getStationsUseCase.execute(Unit).subscribe(
                 { stations -> stationsLiveData.value = stations },
                 { error -> errorLiveData.value = ErrorEvent(error.localizedMessage) }
         ))
+    }
+
+    fun getFleetInfo() {
+        getTotalCarsInfo()
+        getCurrentCarsInfo()
+        getTimeSpentInfo()
+    }
+
+    private fun getCurrentCarsInfo() {
+        manage(getCurrentNumberOfCarsUseCase.execute().subscribe(
+                { currentCars -> currentCarCountLiveData.value = currentCars },
+                { error -> }
+        ))
+    }
+
+    private fun getTotalCarsInfo() {
+        manage(getTotalNumberOfCarsUseCase.execute().subscribe(
+                { totalCars -> totalCarCountLiveData.value = totalCars },
+                { error -> }
+        ))
+    }
+
+    private fun getTimeSpentInfo() {
+        manage(getTotalTimeSpentUseCase.execute().subscribe(
+                { timeSpent -> timeSpentLiveData.value = timeSpent },
+                { error -> }
+        ))
+    }
+
+
+    fun fleet(): List<LiveData<CarEvent>> {
+        return fleet
     }
 
     fun stations(): LiveData<List<Station>> {
@@ -61,12 +92,16 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
         return errorLiveData
     }
 
-    fun timeSpent(): LiveData<Int> {
+    fun totalTimeSpent(): LiveData<Int> {
         return timeSpentLiveData
     }
 
-    fun carCounter(): LiveData<Int> {
-        return carCountLiveData
+    fun currentCarCount(): LiveData<Int> {
+        return currentCarCountLiveData
+    }
+
+    fun totalCarCount(): LiveData<Int> {
+        return totalCarCountLiveData
     }
 
 

@@ -16,8 +16,8 @@ class AddCarUseCase @Inject constructor(schedulersProvider: SchedulersProvider,
     override fun createUseCaseObservable(stationId: String): Observable<CarEvent> {
         return stationRepository.getTripOrigin(stationId)
                 .zipWith(stationRepository.getTripDestination(stationId),
-                        BiFunction<Position, Position, Pair<Position, Position>> { origin, destination -> Pair(origin, destination) }
-                ).flatMapObservable { carRepository.addCar(it.first, it.second) }
+                        BiFunction<Position, Position, Pair<Position, Position>> { origin, destination -> Pair(origin, destination) })
+                .flatMapObservable { carRepository.addCar(it.first, it.second) }
     }
 
 }

@@ -9,12 +9,16 @@ import javax.inject.Inject
 
 class FleetStationRepository @Inject constructor() : StationRepository {
 
+    companion object {
+        const val STATION_SUFFIX = "suffix"
+    }
+
     private val stations = listOf(
-        Station("1", Position(46.517202, 6.629205)),
-        Station("2", Position(46.541050, 6.658185)),
-        Station("3", Position(46.541724, 6.618336)),
-        Station("4", Position(46.522044, 6.565975)),
-        Station("5", Position(46.511076, 6.659613))
+        Station("$STATION_SUFFIX:1", Position(46.517202, 6.629205)),
+        Station("$STATION_SUFFIX:2", Position(46.541050, 6.658185)),
+        Station("$STATION_SUFFIX:3", Position(46.541724, 6.618336)),
+        Station("$STATION_SUFFIX:4", Position(46.522044, 6.565975)),
+        Station("$STATION_SUFFIX:5", Position(46.511076, 6.659613))
     )
 
     override fun getStations(): Single<List<Station>> {
@@ -22,7 +26,7 @@ class FleetStationRepository @Inject constructor() : StationRepository {
     }
 
     override fun getTripOrigin(stationId: String): Single<Position> {
-        //get random station from stations list excluding clicked station
+        //get random station from stations list excluding stationId
         val randomStationPosition = stations.filterNot { it.id == stationId }.shuffled().first().position
         return Single.just(randomStationPosition)
     }

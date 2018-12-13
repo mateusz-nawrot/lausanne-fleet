@@ -12,7 +12,6 @@ data class DirectionsResponse(val routes: List<RouteDto>, val status: String) {
 data class RouteDto(
         @SerializedName("overview_polyline")
         val polyline: PolylineDto
-
 )
 
 data class PolylineDto(val points: String)

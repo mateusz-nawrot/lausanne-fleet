@@ -6,4 +6,7 @@
     <string name="base_url">https://maps.googleapis.com/</string>
 
     <string name="send_car">Send a car</string>
+    <string name="current_number_of_cars">Current number of vehicles :</string>
+    <string name="total_number_of_cars">Total number of vehicles :</string>
+    <string name="total_time_spent">Total time spent [s] :</string>
 </resources>

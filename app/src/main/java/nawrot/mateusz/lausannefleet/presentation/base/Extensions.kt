@@ -8,6 +8,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.VectorDrawable
+import com.google.android.gms.maps.model.Marker
+import nawrot.mateusz.lausannefleet.data.station.FleetStationRepository.Companion.STATION_SUFFIX
 
 
 fun Position.toLatLng(): LatLng {
@@ -31,4 +33,13 @@ fun Context.getBitmapDescriptor(id: Int): BitmapDescriptor {
 
 fun <T> MutableCollection<T>.removeMatching(predicate: (T) -> Boolean) {
     removeAll(filter(predicate))
+}
+
+//station marker's id format is "station:{markerId}" - it is required to distinguish between car and station markers after clicking on them
+fun Marker.isStationMarker(): Boolean {
+    return (tag as String).contains(STATION_SUFFIX)
+}
+
+fun Marker.markerId(): String {
+    return tag as String
 }
