@@ -38,8 +38,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         const val KEY_STATION_MARKERS = "stationmarkers"
         const val KEY_POLYLINES = "polylines"
 
-        const val DEFAULT_MAP_ZOOM = 12.3f
-
+        const val DEFAULT_MAP_ZOOM = 12f
         val LAUSANNE_LAT_LNG = LatLng(46.521474, 6.612146)
     }
 
@@ -274,8 +273,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private fun showLausanne(map: GoogleMap) {
-        map.moveCamera(CameraUpdateFactory.newLatLng(LAUSANNE_LAT_LNG))
-        map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_MAP_ZOOM))
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(LAUSANNE_LAT_LNG, DEFAULT_MAP_ZOOM))
     }
 
     //TODO add random color
