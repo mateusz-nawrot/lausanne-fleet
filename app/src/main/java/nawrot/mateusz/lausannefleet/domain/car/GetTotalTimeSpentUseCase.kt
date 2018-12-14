@@ -7,9 +7,9 @@ import javax.inject.Inject
 
 
 class GetTotalTimeSpentUseCase @Inject constructor(schedulersProvider: SchedulersProvider,
-                                                  private val carRepository: CarRepository): ObservableUnitUseCase<Int>(schedulersProvider) {
+                                                  private val carRepository: CarRepository): ObservableUnitUseCase<Long>(schedulersProvider) {
 
-    override fun createUseCaseObservable(param: Unit): Observable<Int> {
+    override fun createUseCaseObservable(param: Unit): Observable<Long> {
         return carRepository.getTotalTimeSpent()
     }
 }

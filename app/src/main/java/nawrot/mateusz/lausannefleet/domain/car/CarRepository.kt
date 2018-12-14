@@ -12,6 +12,10 @@ interface CarRepository {
 
     fun getTotalNumberOfCars(): Observable<Int>
 
-    fun getTotalTimeSpent(): Observable<Int>
+    fun getTotalTimeSpent(): Observable<Long>
+
+    fun getCarUpdateIntervalMillis(): Long
+
+    fun getMaximumCarCapacity(): Int
 
 }

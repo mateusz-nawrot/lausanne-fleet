@@ -35,7 +35,7 @@ fun <T> MutableCollection<T>.removeMatching(predicate: (T) -> Boolean) {
     removeAll(filter(predicate))
 }
 
-//station marker's id format is "station:{markerId}" - it is required to distinguish between car and station markers after clicking on them
+//station marker's id format is "station{id}" - it is required to distinguish between car and station markers after clicking on them
 fun Marker.isStationMarker(): Boolean {
     return (tag as String).contains(STATION_SUFFIX)
 }

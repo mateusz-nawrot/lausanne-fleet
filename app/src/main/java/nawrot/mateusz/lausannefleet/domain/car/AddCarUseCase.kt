@@ -5,6 +5,7 @@ import io.reactivex.functions.BiFunction
 import nawrot.mateusz.lausannefleet.domain.base.ObservableUseCase
 import nawrot.mateusz.lausannefleet.domain.base.SchedulersProvider
 import nawrot.mateusz.lausannefleet.domain.map.Position
+import nawrot.mateusz.lausannefleet.domain.station.Station
 import nawrot.mateusz.lausannefleet.domain.station.StationRepository
 import javax.inject.Inject
 
@@ -16,7 +17,7 @@ class AddCarUseCase @Inject constructor(schedulersProvider: SchedulersProvider,
     override fun createUseCaseObservable(stationId: String): Observable<CarEvent> {
         return stationRepository.getTripOrigin(stationId)
                 .zipWith(stationRepository.getTripDestination(stationId),
-                        BiFunction<Position, Position, Pair<Position, Position>> { origin, destination -> Pair(origin, destination) })
+                        BiFunction<Station, Station, Pair<Position, Position>> { origin, destination -> Pair(origin.position, destination.position) })
                 .flatMapObservable { carRepository.addCar(it.first, it.second) }
     }
 

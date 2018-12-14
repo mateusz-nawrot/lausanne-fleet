@@ -23,7 +23,7 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
     private val stationsLiveData = MutableLiveData<List<Station>>()
     private val currentCarCountLiveData = MutableLiveData<Int>()
     private val totalCarCountLiveData = MutableLiveData<Int>()
-    private val timeSpentLiveData = MutableLiveData<Int>()
+    private val timeSpentLiveData = MutableLiveData<Long>()
 
     private val fleet = arrayListOf<LiveData<CarEvent>>()
 
@@ -94,7 +94,7 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
         return errorStateLiveData
     }
 
-    fun totalTimeSpent(): LiveData<Int> {
+    fun totalTimeSpent(): LiveData<Long> {
         return timeSpentLiveData
     }
 

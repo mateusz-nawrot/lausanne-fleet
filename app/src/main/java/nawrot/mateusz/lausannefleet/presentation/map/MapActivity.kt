@@ -194,7 +194,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         totalCarsValue.text = counter.toString()
     }
 
-    private fun updateTotalTimeSpent(time: Int) {
+    private fun updateTotalTimeSpent(time: Long) {
         totalTimeValue.text = time.toString()
     }
 
