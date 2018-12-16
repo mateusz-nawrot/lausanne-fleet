@@ -16,7 +16,7 @@ import nawrot.mateusz.lausannefleet.domain.car.CarRepository
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.station.StationRepository
 import nawrot.mateusz.lausannefleet.presentation.FleetApp
-import nawrot.mateusz.lausannefleet.presentation.GoogleMapHelper
+import nawrot.mateusz.lausannefleet.presentation.map.GoogleMapHelper
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

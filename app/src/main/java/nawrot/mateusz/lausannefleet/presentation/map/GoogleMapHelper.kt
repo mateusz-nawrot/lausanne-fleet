@@ -1,4 +1,4 @@
-package nawrot.mateusz.lausannefleet.presentation
+package nawrot.mateusz.lausannefleet.presentation.map
 
 import android.content.Context
 import com.google.android.gms.common.ConnectionResult
