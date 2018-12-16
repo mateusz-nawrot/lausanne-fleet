@@ -27,10 +27,9 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
 
     private val fleet = arrayListOf<LiveData<CarEvent>>()
 
-    //TODO - use when initialized
     fun checkMapsAvailability() {
         //check map availability - emit error VS if no play services installed
-        if (mapHelper.isGooglePlayServicesAvailable().not()) {
+        if (mapHelper.areGooglePlayServicesAvailable().not()) {
             emitError(ErrorEvent("Your device does not support Google Play services", mapError = true))
         }
     }

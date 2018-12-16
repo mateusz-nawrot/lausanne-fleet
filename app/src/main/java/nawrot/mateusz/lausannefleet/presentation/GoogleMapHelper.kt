@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 class GoogleMapHelper @Inject constructor(private val context: Context): MapHelper {
 
-    override fun isGooglePlayServicesAvailable(): Boolean {
+    override fun areGooglePlayServicesAvailable(): Boolean {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
     }
 
