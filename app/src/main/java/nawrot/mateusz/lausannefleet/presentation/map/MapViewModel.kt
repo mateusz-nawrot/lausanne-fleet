@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import nawrot.mateusz.lausannefleet.domain.base.ErrorEvent
 import nawrot.mateusz.lausannefleet.domain.car.*
+import nawrot.mateusz.lausannefleet.domain.map.MapError
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.station.GetStationsUseCase
 import nawrot.mateusz.lausannefleet.domain.station.Station
@@ -29,8 +30,9 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
 
     fun checkMapsAvailability() {
         //check map availability - emit error VS if no play services installed
-        if (mapHelper.areGooglePlayServicesAvailable().not()) {
-            emitError(ErrorEvent("Your device does not support Google Play services", mapError = true))
+        val mapStatus = mapHelper.getGooglePlayServicesAvailability()
+        when (mapStatus) {
+            is MapError -> emitError(ErrorEvent(errorMessage = "Your device does not support Google Play services", errorCode = mapStatus.statusCode, mapError = true))
         }
     }
 

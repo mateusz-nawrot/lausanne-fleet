@@ -6,6 +6,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import nawrot.mateusz.lausannefleet.domain.base.ErrorEvent
 import nawrot.mateusz.lausannefleet.domain.car.*
+import nawrot.mateusz.lausannefleet.domain.map.MapError
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.map.Position
 import nawrot.mateusz.lausannefleet.domain.station.GetStationsUseCase
@@ -162,16 +163,16 @@ class MapViewModelTest {
         viewModel.viewState().observeForever(viewStateObserver)
         viewModel.addCar("1")
 
-        viewStateObserver.verifyValues(ErrorEvent(carError.localizedMessage, false))
+        viewStateObserver.verifyValues(ErrorEvent(carError.localizedMessage, -1, false))
     }
 
     @Test
     fun `ViewModel emits map error event when play services are not available`() {
-        `when`(mapHelper.areGooglePlayServicesAvailable()).thenReturn(false)
+        `when`(mapHelper.getGooglePlayServicesAvailability()).thenReturn(MapError(1))
 
         viewModel.viewState().observeForever(viewStateObserver)
         viewModel.checkMapsAvailability()
 
-        viewStateObserver.verifyValues(ErrorEvent(mapErrorMessage, true))
+        viewStateObserver.verifyValues(ErrorEvent(mapErrorMessage, 1, true))
     }
 }

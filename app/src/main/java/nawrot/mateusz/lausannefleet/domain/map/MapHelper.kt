@@ -3,7 +3,7 @@ package nawrot.mateusz.lausannefleet.domain.map
 
 interface MapHelper {
 
-    fun areGooglePlayServicesAvailable(): Boolean
+    fun getGooglePlayServicesAvailability(): MapStatus
 
     fun decodePolyline(polyline: String): List<Position>
 

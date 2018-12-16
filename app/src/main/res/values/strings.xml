@@ -9,4 +9,5 @@
     <string name="current_number_of_cars">Current number of vehicles :</string>
     <string name="total_number_of_cars">Total number of vehicles :</string>
     <string name="total_time_spent">Total time spent [s] :</string>
+    <string name="value_placeholder">-</string>
 </resources>

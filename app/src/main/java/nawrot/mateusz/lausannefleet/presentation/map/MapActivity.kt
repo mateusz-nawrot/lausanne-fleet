@@ -2,13 +2,13 @@ package nawrot.mateusz.lausannefleet.presentation.map
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -153,6 +153,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private fun observeViewModel() {
+        viewModel.checkMapsAvailability()
         viewModel.viewState().observe(this, Observer { error -> handleErrorEvent(error) })
         viewModel.stations().observe(this, Observer { stations -> drawStations(stations) })
 
@@ -166,8 +167,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private fun handleCarAction(event: CarEvent) {
-        //TODO remove log
-        Log.d("CAR_ACTION", event.toString())
         when (event.type) {
             ActionType.ADD -> {
                 drawCarMarker(event.car)
@@ -200,9 +199,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
     private fun handleErrorEvent(error: ErrorEvent) {
         if (error.mapError) {
-            //TODO - show some dialog/textview?
+            showGoogleMapsError(error.errorCode)
+        } else {
+            //not the best way to handle errors, but the simplest one..
+            Toast.makeText(this@MapActivity, error.errorMessage, Toast.LENGTH_LONG).show()
         }
-        Toast.makeText(this@MapActivity, error.errorMessage, Toast.LENGTH_LONG).show()
     }
 
     private fun findCarMarker(id: String): Marker? {
@@ -276,9 +277,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(LAUSANNE_LAT_LNG, DEFAULT_MAP_ZOOM))
     }
 
-    //TODO add random color
     private fun getColor(): Int {
         return Color.BLACK
+    }
+
+    private fun showGoogleMapsError(errorCode: Int) {
+        GoogleApiAvailability.getInstance().showErrorDialogFragment(this, errorCode, 1)
     }
 
 }
