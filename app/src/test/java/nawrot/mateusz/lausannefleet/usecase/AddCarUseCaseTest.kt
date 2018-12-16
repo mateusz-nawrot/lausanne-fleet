@@ -44,7 +44,7 @@ class AddCarUseCaseTest {
     }
 
     @Test
-    fun `CarRepository adds car with correct trip origin and destination when executed`() {
+    fun `CarRepository adds car with correct trip origin and destination`() {
         val testStationId = "1"
 
         useCase.execute(testStationId).test()
