@@ -12,6 +12,7 @@ import nawrot.mateusz.lausannefleet.domain.station.GetStationsUseCase
 import nawrot.mateusz.lausannefleet.domain.station.Station
 import nawrot.mateusz.lausannefleet.presentation.map.MapViewModel
 import nawrot.mateusz.lausannefleet.verifyValues
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -20,6 +21,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyString
 import org.mockito.MockitoAnnotations
 import java.lang.IllegalStateException
+import java.util.concurrent.TimeUnit
 
 
 class MapViewModelTest {
@@ -41,6 +43,8 @@ class MapViewModelTest {
 
     private val testStations = listOf(Station("1", Position(1.0, 1.0)))
 
+    private val testCarEvent = CarEvent("1", ActionType.MOVE, Car("1", Position(1.0, 1.0), Position(2.0, 2.0), listOf()))
+
     //test observers
     @Mock
     private lateinit var viewStateObserver: Observer<ErrorEvent>
@@ -56,6 +60,9 @@ class MapViewModelTest {
 
     @Mock
     private lateinit var stationsObserver: Observer<List<Station>>
+
+    @Mock
+    private lateinit var fleetObserver: Observer<List<CarEvent>>
 
     //mocked use cases
     @Mock
@@ -128,6 +135,24 @@ class MapViewModelTest {
         viewModel.getFleetInfo()
 
         timeSpentObserver.verifyValues(testTimeSpent)
+    }
+
+    @Test
+    fun `ViewModel emits cars fleet with proper size`() {
+        //delay is here to prevent Observable from termination after emitting testCarEvent
+        val testCarObservable = Observable.just(testCarEvent).delay(3, TimeUnit.SECONDS)
+
+        `when`(addCarUseCase.execute(anyString())).thenReturn(testCarObservable)
+
+        val fleetSize = 3
+
+        for (i in 0 until fleetSize) {
+            viewModel.addCar("1")
+        }
+
+        val fleet = viewModel.fleet()
+
+        assertEquals(fleetSize, fleet.size)
     }
 
     @Test
