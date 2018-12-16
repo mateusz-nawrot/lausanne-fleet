@@ -48,7 +48,7 @@ class MapViewModel @Inject constructor(private val getStationsUseCase: GetStatio
     }
 
     fun getStations() {
-        manage(getStationsUseCase.execute(Unit).subscribe(
+        manage(getStationsUseCase.execute().subscribe(
                 { stations -> stationsLiveData.value = stations },
                 { error -> emitError(ErrorEvent(error.localizedMessage)) }
         ))

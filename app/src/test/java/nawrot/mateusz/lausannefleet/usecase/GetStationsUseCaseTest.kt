@@ -44,7 +44,7 @@ class GetStationsUseCaseTest {
 
     @Test
     fun `GetStationsUseCase returns stations list from repository`() {
-        val testObserver = useCase.execute(Unit).test()
+        val testObserver = useCase.execute().test()
 
         verify(stationRepository).getStations()
 
