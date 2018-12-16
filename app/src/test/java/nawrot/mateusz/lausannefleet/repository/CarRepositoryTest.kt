@@ -1,4 +1,4 @@
-package nawrot.mateusz.lausannefleet
+package nawrot.mateusz.lausannefleet.repository
 
 import io.reactivex.Single
 import io.reactivex.subjects.ReplaySubject

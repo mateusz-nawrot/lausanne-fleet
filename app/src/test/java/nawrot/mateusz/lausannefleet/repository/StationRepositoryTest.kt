@@ -1,4 +1,4 @@
-package nawrot.mateusz.lausannefleet
+package nawrot.mateusz.lausannefleet.repository
 
 import nawrot.mateusz.lausannefleet.data.station.FleetStationRepository
 import nawrot.mateusz.lausannefleet.domain.station.StationRepository

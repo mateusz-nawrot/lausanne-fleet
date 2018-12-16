@@ -1,4 +1,4 @@
-package nawrot.mateusz.lausannefleet
+package nawrot.mateusz.lausannefleet.usecase
 
 import io.reactivex.ObservableTransformer
 import io.reactivex.Single
@@ -38,13 +38,13 @@ class AddCarUseCaseTest {
         MockitoAnnotations.initMocks(this)
         useCase = AddCarUseCase(schedulersProvider, stationRepository, carRepository)
 
-        `when`(schedulersProvider.observableTransformer<CarEvent>()).thenReturn(ObservableTransformer { it })
+        `when`(schedulersProvider.observableTransformer<Any>()).thenReturn(ObservableTransformer { it })
         `when`(stationRepository.getTripOrigin("1")).thenReturn(Single.just(testOrigin))
         `when`(stationRepository.getTripDestination("1")).thenReturn(Single.just(testDestination))
     }
 
     @Test
-    fun `CarRepository gets correct trip origin and destination from StationRepository when AddCarUseCase is executed`() {
+    fun `CarRepository adds car with correct trip origin and destination when executed`() {
         val testStationId = "1"
 
         useCase.execute(testStationId).test()
