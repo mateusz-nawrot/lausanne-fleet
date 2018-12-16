@@ -3,11 +3,13 @@ package nawrot.mateusz.lausannefleet.viewmodel
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import io.reactivex.Observable
+import io.reactivex.Single
 import nawrot.mateusz.lausannefleet.domain.base.ErrorEvent
 import nawrot.mateusz.lausannefleet.domain.car.*
 import nawrot.mateusz.lausannefleet.domain.map.MapHelper
 import nawrot.mateusz.lausannefleet.domain.map.Position
 import nawrot.mateusz.lausannefleet.domain.station.GetStationsUseCase
+import nawrot.mateusz.lausannefleet.domain.station.Station
 import nawrot.mateusz.lausannefleet.presentation.map.MapViewModel
 import nawrot.mateusz.lausannefleet.verifyValues
 import org.junit.Before
@@ -26,9 +28,36 @@ class MapViewModelTest {
     @JvmField
     var instantExecutorRule = InstantTaskExecutorRule()
 
+    //test objects
+    private val testCurrentCars = 1
+
+    private val testTotalCars = 3
+
+    private val testTimeSpent = 300L
+
+    private val carError = IllegalStateException("You have reached maximum number of cars")
+
+    private val mapErrorMessage = "Your device does not support Google Play services"
+
+    private val testStations = listOf(Station("1", Position(1.0, 1.0)))
+
+    //test observers
     @Mock
     private lateinit var viewStateObserver: Observer<ErrorEvent>
 
+    @Mock
+    private lateinit var totalCarsObserver: Observer<Int>
+
+    @Mock
+    private lateinit var currentCarsObserver: Observer<Int>
+
+    @Mock
+    private lateinit var timeSpentObserver: Observer<Long>
+
+    @Mock
+    private lateinit var stationsObserver: Observer<List<Station>>
+
+    //mocked use cases
     @Mock
     private lateinit var getStationsUseCase: GetStationsUseCase
 
@@ -49,12 +78,6 @@ class MapViewModelTest {
 
     private lateinit var viewModel: MapViewModel
 
-    private val testCarEvent = CarEvent("id", ActionType.MOVE, Car("id", Position(1.0, 1.0), Position(2.0, 2.0), listOf()))
-
-    private val carError = IllegalStateException("You have reached maximum number of cars")
-
-    private val mapErrorMessage = "Your device does not support Google Play services"
-
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -68,7 +91,43 @@ class MapViewModelTest {
                 mapHelper
         )
 
-     `when`(addCarUseCase.execute(anyString())).thenReturn(Observable.just(testCarEvent))
+        `when`(getCurrentNumberOfCarsUseCase.execute()).thenReturn(Observable.just(testCurrentCars))
+        `when`(getTotalNumberOfCarsUseCase.execute()).thenReturn(Observable.just(testTotalCars))
+        `when`(getTotalTimeSpentUseCase.execute()).thenReturn(Observable.just(testTimeSpent))
+    }
+
+    @Test
+    fun `ViewModel emits stations list when use case succeeds`() {
+        `when`(getStationsUseCase.execute()).thenReturn(Single.just(testStations))
+
+        viewModel.stations().observeForever(stationsObserver)
+        viewModel.getStations()
+
+        stationsObserver.verifyValues(testStations)
+    }
+
+    @Test
+    fun `ViewModel emits current car count when use case succeeds`() {
+        viewModel.currentCarCount().observeForever(currentCarsObserver)
+        viewModel.getFleetInfo()
+
+        currentCarsObserver.verifyValues(testCurrentCars)
+    }
+
+    @Test
+    fun `ViewModel emits total time spent when use case succeeds`() {
+        viewModel.totalCarCount().observeForever(totalCarsObserver)
+        viewModel.getFleetInfo()
+
+        totalCarsObserver.verifyValues(testTotalCars)
+    }
+
+    @Test
+    fun `ViewModel emits total car count when use case succeeds`() {
+        viewModel.totalTimeSpent().observeForever(timeSpentObserver)
+        viewModel.getFleetInfo()
+
+        timeSpentObserver.verifyValues(testTimeSpent)
     }
 
     @Test
@@ -76,12 +135,9 @@ class MapViewModelTest {
         `when`(addCarUseCase.execute(anyString())).thenReturn(Observable.error(carError))
 
         viewModel.viewState().observeForever(viewStateObserver)
-
         viewModel.addCar("1")
 
-        viewStateObserver.verifyValues(
-            ErrorEvent(carError.localizedMessage, false)
-        )
+        viewStateObserver.verifyValues(ErrorEvent(carError.localizedMessage, false))
     }
 
     @Test
@@ -89,11 +145,8 @@ class MapViewModelTest {
         `when`(mapHelper.areGooglePlayServicesAvailable()).thenReturn(false)
 
         viewModel.viewState().observeForever(viewStateObserver)
-
         viewModel.checkMapsAvailability()
 
-        viewStateObserver.verifyValues(
-            ErrorEvent(mapErrorMessage, true)
-        )
+        viewStateObserver.verifyValues(ErrorEvent(mapErrorMessage, true))
     }
 }
