@@ -20,7 +20,7 @@ class FleetCarRepository @Inject constructor(private val apiInterface: ApiInterf
                                              private val mapHelper: MapHelper) : CarRepository {
 
     companion object {
-        const val DEFAULT_CAR_UPDATE_INTERVAL_MILLIS = 100L
+        const val DEFAULT_CAR_UPDATE_INTERVAL_MILLIS = 1000L
         const val DEFAULT_MAXIMUM_CAPACITY = 10
 
         const val TOTAL_TIME_UPDATE_INTERVAL_MILLIS = 5000L
