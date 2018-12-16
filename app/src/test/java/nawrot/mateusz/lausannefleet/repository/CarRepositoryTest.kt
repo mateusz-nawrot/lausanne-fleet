@@ -1,6 +1,7 @@
 package nawrot.mateusz.lausannefleet.repository
 
 import io.reactivex.Single
+import io.reactivex.observers.TestObserver
 import io.reactivex.subjects.ReplaySubject
 import nawrot.mateusz.lausannefleet.data.ApiInterface
 import nawrot.mateusz.lausannefleet.data.car.FleetCarRepository
@@ -44,6 +45,8 @@ class CarRepositoryTest {
             Position(3.0, 3.0)
     )
 
+    private val maximumNumberOfCars = 5
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -52,7 +55,7 @@ class CarRepositoryTest {
         `when`(mapHelper.decodePolyline(ArgumentMatchers.anyString())).thenReturn(testRoute)
 
 
-        `when`(carRepository.getMaximumCarCapacity()).thenReturn(10)
+        `when`(carRepository.getMaximumCarCapacity()).thenReturn(maximumNumberOfCars)
     }
 
     @Test
@@ -74,6 +77,7 @@ class CarRepositoryTest {
     @Test
     fun `Car repository emits correct total number of cars`() {
         `when`(carRepository.getCarUpdateIntervalMillis()).thenReturn(1L)
+
         val numberOfCars = 3
 
         for (i in 0 until numberOfCars) {
@@ -105,5 +109,34 @@ class CarRepositoryTest {
         assertEquals(1, currentNumberOfCars)
     }
 
+    @Test
+    fun `Car repository don't emit an error when maximum number of cars not reached`() {
+        val observers = mutableListOf<TestObserver<CarEvent>>()
+
+        for (i in 0 until maximumNumberOfCars) {
+            observers.add(carRepository.addCar(testOrigin, testDestination).test())
+        }
+
+        observers.forEach {
+            it.assertNoErrors()
+        }
+    }
+
+    @Test
+    fun `Car repository emits an error when maximum number of cars reached`() {
+        val observers = mutableListOf<TestObserver<CarEvent>>()
+
+        for (i in 0 until maximumNumberOfCars) {
+            observers.add(carRepository.addCar(testOrigin, testDestination).test())
+        }
+
+        observers.forEach {
+            it.assertNoErrors()
+        }
+
+        val carOverLimit = carRepository.addCar(testOrigin, testDestination).test()
+
+        carOverLimit.assertError(IllegalStateException::class.java)
+    }
 
 }
